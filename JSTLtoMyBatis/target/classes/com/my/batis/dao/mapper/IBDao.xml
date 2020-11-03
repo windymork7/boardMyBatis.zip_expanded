@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+<mapper namespace="com.my.batis.dao.IBDao">
+	<select id="boardlist" resultType="com.my.batis.dto.BoardDto">
+		SELECT * 
+		FROM(SELECT rownum rnum,BOARD_NUM,BOARD_NAME,BOARD_SUBJECT,BOARD_CONTENT,BOARD_RE_REF,BOARD_RE_LEV, BOARD_RE_SEQ,BOARD_READ_COUNT,BOARD_DATE
+		FROM (SELECT * FROM board_tbl ORDER BY BOARD_RE_REF DESC, BOARD_RE_SEQ ASC))
+		WHERE rnum BETWEEN ${param1} AND ${param2} 
+	</select>
+	
+	<select id="getListCount" resultType="int">
+		SELECT COUNT(*) FROM board_tbl
+	</select>
+
+	<insert id="boardAdd">
+		INSERT INTO board_tbl (board_num , board_name, board_pass, board_subject, board_content, board_re_ref, board_re_lev, board_re_seq, board_read_count, board_date)
+		 values(board_tbl_seq.nextval, #{param1}, #{param2}, #{param3}, #{param4}, board_tbl_seq.currval, 0, 0, 0, sysdate)
+	</insert>
+	
+	<update id="upHit">
+		UPDATE board_tbl SET board_read_count = board_read_count + 1 WHERE board_num = #{param1}
+	</update>
+	
+	<select id="boardDetail" resultType="com.my.batis.dto.BoardDto">
+		SELECT * FROM board_tbl WHERE board_num = #{param1}
+	</select>
+	
+	<update id="boardModify">
+		UPDATE board_tbl SET board_subject= #{param1}, board_content= #{param2} WHERE board_num = #{param3} AND board_pass= #{param4}
+	</update>
+	
+	<delete id="boardDelete">
+		DELETE FROM board_tbl WHERE board_num= #{param1}
+	</delete>
+	
+	<update id="boardReSeq">
+		UPDATE board_tbl SET BOARD_RE_SEQ=BOARD_RE_SEQ+1 WHERE BOARD_RE_REF = #{board_re_ref} AND BOARD_RE_SEQ > #{board_re_seq}
+	</update>
+	
+	<insert id="boardReplyAdd">
+		INSERT INTO board_tbl (BOARD_NUM, BOARD_NAME, BOARD_PASS, BOARD_SUBJECT, 
+		BOARD_CONTENT, BOARD_RE_REF, BOARD_RE_LEV, BOARD_RE_SEQ, 
+		BOARD_READ_COUNT, BOARD_DATE) VALUES(board_tbl_seq.nextval,#{board_name},#{board_pass},#{board_subject},#{board_content},#{board_re_ref},#{board_re_lev}+1,#{board_re_seq}+1,0,sysdate)
+	</insert>
+</mapper>
